@@ -107,6 +107,41 @@ async function run(){
             res.send(users)
           })
 
+          app.put('/user/:email' , async(req,res) =>{
+            const email = req.params.email;
+            const user = req.body
+            const filter = {email:email}
+            const options = {upsert:true}
+            const updatedDoc = {
+
+              $set:user
+            }
+            const result = await usersCollection.updateOne(filter , updatedDoc,options)
+            const token = jwt.sign({email:email} , '370334ba94458c6a1951596b2e98db9756e213301330c290352fc0abef332cbc6d30ba5277c238cce51b68db60623f20352bf7e6a2451b45400aa164b2176e26' , {expiresIn:'1h'})
+            res.send({result , token})
+          })
+
+          app.put('/users/admin/:email' , async(req,res) =>{
+            const email = req.params.email;
+             const filter = {email:email}
+            
+            const updatedDoc = {
+
+              $set:{role:'admin'}
+            }
+            const result = await usersCollection.updateOne(filter , updatedDoc)
+            
+            res.send(result )
+
+          })
+
+          app.get('/admin/:email' , async(req,res) =>{
+            const email = req.params.email
+            const user = await usersCollection.findOne({email:email})
+            const isAdmin = user.role === 'admin'
+            res.send({admin:isAdmin})
+          })
+
     }
     finally{
 
